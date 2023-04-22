@@ -65,12 +65,10 @@ def main():
                   COlevel=readadc(mq7_apin, SPICLK, SPIMOSI, SPIMISO, SPICS)
                   
                   if GPIO.input(mq7_dpin):
-                           print("CO not leak")
+                           print("not leak")
                            time.sleep(0.5)
                   else:
-                           print("CO is detected")
-                           print("Current CO AD vaule = " +str("%.2f"%((COlevel/1024.)*5))+" V")
-                           print("Current CO density is:" +str("%.2f"%((COlevel/1024.)*100))+" %")
+                           print("Current AD vaule = " +str("%.2f"%((COlevel/1024.)*5))+" V")
                            time.sleep(0.5)
 
 if __name__ =='__main__':
