@@ -66,12 +66,12 @@ def main():
     time.sleep(20)
     while True:
         raw_date=readadc(mq7_apin, SPICLK, SPIMOSI, SPIMISO, SPICS)
-        voltage=(raw_date/1024.)*5
         
         if GPIO.input(mq7_dpin):
             print("not leak")
             time.sleep(0.5)
-        else:     
+        else:
+            voltage=(raw_date/1024.)*5
             print("Current AD vaule = " +str("%.2f"%(voltage)+" V"))
             if voltage > 2.0:
                 GPIO.output(led_pin, GPIO.HIGH)
