@@ -6,8 +6,8 @@
 
 ## 镜像地址
 
-[qiuyin/raspberrypi-gas-sensor:dind](https://hub.docker.com/r/qiuyin/raspberrypi-gas-sensor)
-
+[qiuyin/raspberrypi-gas-sensor:dind](https://hub.docker.com/r/qiuyin/raspberrypi-gas-sensor)  
+*注意*：镜像使用的架构为**ARMv7**,并且只能在**raspberrypi**上使用
 ## 使用
 
 ```
