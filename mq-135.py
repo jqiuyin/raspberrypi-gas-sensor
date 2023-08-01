@@ -4,7 +4,7 @@ import random
 from paho.mqtt import client as mqtt_client
 import os
 
-DEV_MODE = os.environ.get('SMS_SEND', 'false').lower() in ['true', 'on', '1']
+DEV_MODE = os.environ.get('DEV_MODE', 'false').lower() in ['true', 'on', '1']
 
 broker = '127.0.0.1'  # mqtt代理服务器地址
 port = 1883
