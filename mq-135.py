@@ -3,6 +3,7 @@ import time
 import random
 from paho.mqtt import client as mqtt_client
 import os
+import json
 
 DEV_MODE = os.environ.get('DEV_MODE', 'false').lower() in ['true', 'on', '1']
 
@@ -95,6 +96,7 @@ def publish(client):
                 'timestamp': time.time(),
                 'current_ad_value': str("%.2f"%(voltage)+" V")
             }
+            info = json.dumps(info)
             client.publish(topic, info)
             continue
         raw_date=readadc(mq7_apin, SPICLK, SPIMOSI, SPIMISO, SPICS)
@@ -107,6 +109,7 @@ def publish(client):
                  'timestamp': time.time(),
                  'current_ad_value': str("%.2f"%(voltage)+" V")
             }
+            info = json.dumps(info)
             client.publish(topic, info)
             if voltage > 2.0:
                 GPIO.output(led_pin, GPIO.HIGH)
