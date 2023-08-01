@@ -19,7 +19,7 @@ def createActualUpdateMessage(actualValue):
         "event_id": "123e4567-e89b-12d3-a456-426655440000",
         "timestamp": int(time.time()),
         "twin": {
-            "concentration": {
+            "concentration-status": {
                 "actual": {
                     "value": actualValue,
                     "metadata": {
