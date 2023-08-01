@@ -1,5 +1,31 @@
 import RPi.GPIO as GPIO
 import time
+import random
+from paho.mqtt import client as mqtt_client
+import os
+
+DEV_MODE = os.environ.get('SMS_SEND', 'false').lower() in ['true', 'on', '1']
+
+broker = '127.0.0.1'  # mqtt代理服务器地址
+port = 1883
+keepalive = 60     # 与代理通信之间允许的最长时间段（以秒为单位）              
+topic = "/python/mqtt"  # 消息主题
+client_id = f'python-mqtt-pub-{random.randint(0, 1000)}'  # 客户端id不能重复
+
+def connect_mqtt():
+    '''连接mqtt代理服务器'''
+    def on_connect(client, userdata, flags, rc):
+        '''连接回调函数'''
+        # 响应状态码为0表示连接成功
+        if rc == 0:
+            print("Connected to MQTT OK!")
+        else:
+            print("Failed to connect, return code %d\n", rc)
+    # 连接mqtt代理服务器，并获取连接引用
+    client = mqtt_client.Client(client_id)
+    client.on_connect = on_connect
+    client.connect(broker, port, keepalive)
+    return client
 
 # change these as desired - they're the pins connected from the
 # SPI port on the ADC to the Cobbler
@@ -60,28 +86,45 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
     adcout >>= 1       # first bit is 'null' so drop it
     return adcout
 #main ioop
-def main():
-    init()
-    print("please wait...")
-    time.sleep(20)
+def publish(client):
     while True:
+        time.sleep(1)
+        if DEV_MODE:
+            info = {
+                'timestamp': time.time(),
+                'current_ad_value': round(random.uniform(0, 5), 2)+" V"
+            }
+            client.publish(topic, info)
+            continue
         raw_date=readadc(mq7_apin, SPICLK, SPIMOSI, SPIMISO, SPICS)
-        
         if GPIO.input(mq7_dpin):
             print("not leak")
-            time.sleep(0.5)
         else:
             voltage=(raw_date/1024.)*5
             print("Current AD vaule = " +str("%.2f"%(voltage)+" V"))
+            info ={
+                 'timestamp': time.time(),
+                 'current_ad_value': str("%.2f"%(voltage)+" V")
+            }
+            client.publish(topic, info)
             if voltage > 2.0:
                 GPIO.output(led_pin, GPIO.HIGH)
             else:
                 GPIO.output(led_pin, GPIO.LOW)
-            time.sleep(0.5)
+
+def run():
+    '''运行发布者'''
+    client = connect_mqtt()
+    # 运行一个线程来自动调用loop()处理网络事件, 非阻塞
+    client.loop_start()
+    publish(client)
 
 if __name__ =='__main__':
     try:
-        main()
+        init()
+        print("please wait...")
+        time.sleep(20)
+        run()
         pass
     except KeyboardInterrupt:
         pass
