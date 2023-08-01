@@ -20,6 +20,6 @@ spec:
       containers:
       - name: concentration
         image: qiuyin/raspberrypi-gas-sensor:dind
-        imagePullPolicy: always
+        imagePullPolicy: Always
         securityContext:
           privileged: true
