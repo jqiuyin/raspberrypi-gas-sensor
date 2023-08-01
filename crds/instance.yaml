@@ -1,0 +1,24 @@
+apiVersion: devices.kubeedge.io/v1alpha2
+kind: Device
+metadata:
+  name: concentration
+  labels:
+    description: "concentration"
+    manufacturer: "test"
+spec:
+  deviceModelRef:
+    name: concentration-model
+  nodeSelector:
+    nodeSelectorTerms:
+      - matchExpressions:
+          - key: ""
+            operator: In
+            values:
+              - raspberrypi
+status:
+  twins:
+    - propertyName: concentration-status
+      desired:
+        metadata:
+          type: string
+        value: ""
