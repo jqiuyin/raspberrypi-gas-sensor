@@ -26,3 +26,10 @@ spec:
         imagePullPolicy: Always
         securityContext:
           privileged: true
+        volumeMounts:
+        - mountPath: /dev/gpiomem
+          name: gpiomem
+      volumes:
+      - name: gpiomem
+        hostPath:
+          path: /dev/gpiomem
