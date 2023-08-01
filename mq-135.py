@@ -118,7 +118,7 @@ def publish(client):
         time.sleep(1)
         if DEV_MODE:
             voltage = round(random.uniform(0, 5), 2)
-            info=createActualUpdateMessage(str("%.2f" % (voltage)+" V"))
+            info=createActualUpdateMessage(str("%.2f" % (voltage)+"V"))
             client.publish(topic, info)
             continue
         raw_date = readadc(mq7_apin, SPICLK, SPIMOSI, SPIMISO, SPICS)
@@ -126,8 +126,8 @@ def publish(client):
             print("not leak")
         else:
             voltage = (raw_date/1024.)*5
-            print("Current AD vaule = " + str("%.2f" % (voltage)+" V"))
-            info=createActualUpdateMessage(str("%.2f" % (voltage)+" V"))
+            print("Current AD vaule = " + str("%.2f" % (voltage)+"V"))
+            info=createActualUpdateMessage(str("%.2f" % (voltage)+"V"))
             client.publish(topic, info)
             if voltage > 2.0:
                 GPIO.output(led_pin, GPIO.HIGH)
