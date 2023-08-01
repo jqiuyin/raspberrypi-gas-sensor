@@ -90,9 +90,10 @@ def publish(client):
     while True:
         time.sleep(1)
         if DEV_MODE:
+            voltage = round(random.uniform(0, 5), 2)
             info = {
                 'timestamp': time.time(),
-                'current_ad_value': round(random.uniform(0, 5), 2)+" V"
+                'current_ad_value': str("%.2f"%(voltage)+" V")
             }
             client.publish(topic, info)
             continue
