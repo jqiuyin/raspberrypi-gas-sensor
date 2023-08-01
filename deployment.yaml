@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: concentration-mapper
+  labels:
+    app: concentration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: concentration
+  template:
+    metadata:
+      labels:
+        app: concentration
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        name: "raspberrypi"
+      containers:
+      - name: concentration
+        image: qiuyin/raspberrypi-gas-sensor:dind
+        imagePullPolicy: always
+        securityContext:
+          privileged: true
