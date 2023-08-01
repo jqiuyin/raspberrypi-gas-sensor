@@ -21,7 +21,7 @@ spec:
       - name: concentration
         image: qiuyin/raspberrypi-gas-sensor:dind
         env:
-          name: "DEV_MODE"
+        - name: "DEV_MODE"
           value: "true"
         imagePullPolicy: Always
         securityContext:
