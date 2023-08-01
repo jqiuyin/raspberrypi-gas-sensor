@@ -10,7 +10,7 @@ DEV_MODE = os.environ.get('DEV_MODE', 'false').lower() in ['true', 'on', '1']
 broker = '127.0.0.1'  # mqtt代理服务器地址
 port = 1883
 keepalive = 60     # 与代理通信之间允许的最长时间段（以秒为单位）              
-topic = "/python/mqtt"  # 消息主题
+topic = "$hw/events/device/concentration/twin/update"  # 消息主题
 client_id = f'python-mqtt-pub-{random.randint(0, 1000)}'  # 客户端id不能重复
 
 def connect_mqtt():
