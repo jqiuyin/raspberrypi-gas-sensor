@@ -9,9 +9,28 @@ DEV_MODE = os.environ.get('DEV_MODE', 'false').lower() in ['true', 'on', '1']
 
 broker = '127.0.0.1'  # mqtt代理服务器地址
 port = 1883
-keepalive = 60     # 与代理通信之间允许的最长时间段（以秒为单位）              
+keepalive = 60     # 与代理通信之间允许的最长时间段（以秒为单位）
 topic = "$hw/events/device/concentration/twin/update"  # 消息主题
 client_id = f'python-mqtt-pub-{random.randint(0, 1000)}'  # 客户端id不能重复
+
+
+def createActualUpdateMessage(actualValue):
+    msg = {
+        "event_id": "123e4567-e89b-12d3-a456-426655440000",
+        "timestamp": int(time.time()),
+        "twin": {
+            "concentration": {
+                "actual": {
+                    "value": actualValue,
+                    "metadata": {
+                        "type": "Updated"
+                    }
+                }
+            }
+        }
+    }
+    return json.dumps(msg)
+
 
 def connect_mqtt():
     '''连接mqtt代理服务器'''
@@ -28,6 +47,7 @@ def connect_mqtt():
     client.connect(broker, port, keepalive)
     return client
 
+
 # change these as desired - they're the pins connected from the
 # SPI port on the ADC to the Cobbler
 SPICLK = 11
@@ -38,25 +58,29 @@ mq7_dpin = 26
 mq7_apin = 0
 led_pin = 21
 
-#port init
+# port init
+
+
 def init():
     GPIO.setwarnings(False)
-    GPIO.cleanup()			#clean up at the end of your script
-    GPIO.setmode(GPIO.BCM)		#to specify whilch pin numbering system
+    GPIO.cleanup()  # clean up at the end of your script
+    GPIO.setmode(GPIO.BCM)  # to specify whilch pin numbering system
     # set up the SPI interface pins
     GPIO.setup(SPIMOSI, GPIO.OUT)
     GPIO.setup(SPIMISO, GPIO.IN)
     GPIO.setup(SPICLK, GPIO.OUT)
     GPIO.setup(SPICS, GPIO.OUT)
-    GPIO.setup(mq7_dpin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(mq7_dpin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(led_pin, GPIO.OUT)
     GPIO.output(led_pin, GPIO.LOW)
 
-#read SPI data from MCP3008(or MCP3204) chip,8 possible adc's (0 thru 7)
+# read SPI data from MCP3008(or MCP3204) chip,8 possible adc's (0 thru 7)
+
+
 def readadc(adcnum, clockpin, mosipin, misopin, cspin):
     if ((adcnum > 7) or (adcnum < 0)):
         return -1
-    GPIO.output(cspin, True)	
+    GPIO.output(cspin, True)
 
     GPIO.output(clockpin, False)  # start clock low
     GPIO.output(cspin, False)     # bring CS low
@@ -66,9 +90,9 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
     commandout <<= 3    # we only need to send 5 bits here
     for i in range(5):
         if (commandout & 0x80):
-                GPIO.output(mosipin, True)
+            GPIO.output(mosipin, True)
         else:
-                GPIO.output(mosipin, False)
+            GPIO.output(mosipin, False)
         commandout <<= 1
         GPIO.output(clockpin, True)
         GPIO.output(clockpin, False)
@@ -80,41 +104,36 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
         GPIO.output(clockpin, False)
         adcout <<= 1
         if (GPIO.input(misopin)):
-                adcout |= 0x1
+            adcout |= 0x1
 
     GPIO.output(cspin, True)
-    
+
     adcout >>= 1       # first bit is 'null' so drop it
     return adcout
-#main ioop
+# main ioop
+
+
 def publish(client):
     while True:
         time.sleep(1)
         if DEV_MODE:
             voltage = round(random.uniform(0, 5), 2)
-            info = {
-                'timestamp': time.time(),
-                'current_ad_value': str("%.2f"%(voltage)+" V")
-            }
-            info = json.dumps(info)
+            info=createActualUpdateMessage(str("%.2f" % (voltage)+" V"))
             client.publish(topic, info)
             continue
-        raw_date=readadc(mq7_apin, SPICLK, SPIMOSI, SPIMISO, SPICS)
+        raw_date = readadc(mq7_apin, SPICLK, SPIMOSI, SPIMISO, SPICS)
         if GPIO.input(mq7_dpin):
             print("not leak")
         else:
-            voltage=(raw_date/1024.)*5
-            print("Current AD vaule = " +str("%.2f"%(voltage)+" V"))
-            info ={
-                 'timestamp': time.time(),
-                 'current_ad_value': str("%.2f"%(voltage)+" V")
-            }
-            info = json.dumps(info)
+            voltage = (raw_date/1024.)*5
+            print("Current AD vaule = " + str("%.2f" % (voltage)+" V"))
+            info=createActualUpdateMessage(str("%.2f" % (voltage)+" V"))
             client.publish(topic, info)
             if voltage > 2.0:
                 GPIO.output(led_pin, GPIO.HIGH)
             else:
                 GPIO.output(led_pin, GPIO.LOW)
+
 
 def run():
     '''运行发布者'''
@@ -123,7 +142,8 @@ def run():
     client.loop_start()
     publish(client)
 
-if __name__ =='__main__':
+
+if __name__ == '__main__':
     try:
         init()
         print("please wait...")
@@ -134,5 +154,3 @@ if __name__ =='__main__':
         pass
 
 GPIO.cleanup()
-         
-         
